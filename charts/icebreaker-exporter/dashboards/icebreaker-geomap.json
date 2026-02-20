@@ -1,0 +1,70 @@
+{
+  "title": "Nordic Icebreakers",
+  "timezone": "browser",
+  "refresh": "1m",
+  "schemaVersion": 36,
+  "panels": [
+    {
+      "type": "geomap",
+      "title": "Icebreaker Locations",
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "icebreaker_latitude_degrees",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "expr": "icebreaker_longitude_degrees",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "latitude",
+              "Value #B": "longitude"
+            }
+          }
+        }
+      ],
+      "options": {
+        "view": {
+          "id": "zero",
+          "lat": 63,
+          "lon": 22,
+          "zoom": 4
+        },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "Icebreakers",
+            "config": {
+              "showLegend": true
+            },
+            "location": {
+              "mode": "auto"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -84,8 +84,8 @@ icebreaker_refresh_duration_seconds 0.354123
 icebreaker_positions 3
 # HELP icebreaker_latitude_degrees Current latitude of a Nordic icebreaker
 # TYPE icebreaker_latitude_degrees gauge
-icebreaker_latitude_degrees{vessel_name="OTSO",mmsi="230124000"} 65.123456
+icebreaker_latitude_degrees{vessel_name="OTSO",mmsi="230124000",country="FI"} 65.123456
 # HELP icebreaker_longitude_degrees Current longitude of a Nordic icebreaker
 # TYPE icebreaker_longitude_degrees gauge
-icebreaker_longitude_degrees{vessel_name="OTSO",mmsi="230124000"} 24.987654
+icebreaker_longitude_degrees{vessel_name="OTSO",mmsi="230124000",country="FI"} 24.987654
 ```

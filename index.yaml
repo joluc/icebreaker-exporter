@@ -2,6 +2,20 @@ apiVersion: v1
 entries:
   icebreaker-exporter:
   - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2026-02-23T14:00:13.737395765Z"
+    description: A Prometheus exporter for tracking Nordic icebreakers via the Digitraffic
+      API
+    digest: 86eb0437fcceac7a8fcfd8d72e32223fe9e88f077475496e445360cc78fb22b6
+    maintainers:
+    - name: joluc
+      url: https://github.com/joluc
+    name: icebreaker-exporter
+    type: application
+    urls:
+    - https://github.com/joluc/icebreaker-exporter/releases/download/icebreaker-exporter-0.2.0/icebreaker-exporter-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     appVersion: 0.1.0
     created: "2026-02-20T14:26:48.048785356Z"
     description: A Prometheus exporter for tracking Nordic icebreakers via the Digitraffic
@@ -15,4 +29,4 @@ entries:
     urls:
     - https://github.com/joluc/icebreaker-exporter/releases/download/icebreaker-exporter-0.1.0/icebreaker-exporter-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-20T14:26:48.048791538Z"
+generated: "2026-02-23T14:00:13.737403411Z"

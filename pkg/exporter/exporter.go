@@ -84,15 +84,28 @@ func (e *Exporter) MetricsHandler(w http.ResponseWriter, _ *http.Request) {
 	writeMetricHeader(&b, "icebreaker_longitude_degrees", "Current longitude of a Nordic icebreaker", "gauge")
 	writeMetricHeader(&b, "icebreaker_last_report_timestamp_seconds", "Unix timestamp of the vessel position report", "gauge")
 	writeMetricHeader(&b, "icebreaker_report_age_seconds", "Seconds since the latest vessel position report", "gauge")
+	writeMetricHeader(&b, "icebreaker_speed_over_ground_knots", "Speed over ground in knots", "gauge")
+	writeMetricHeader(&b, "icebreaker_course_over_ground_degrees", "Course over ground in degrees", "gauge")
+	writeMetricHeader(&b, "icebreaker_heading_degrees", "True heading in degrees", "gauge")
+	writeMetricHeader(&b, "icebreaker_navigation_status", "AIS navigation status code", "gauge")
+	writeMetricHeader(&b, "icebreaker_rate_of_turn_degrees_per_minute", "Rate of turn in degrees per minute", "gauge")
 
 	for _, pos := range s.Positions {
 		labels := fmt.Sprintf(`vessel_name="%s",mmsi="%s",country="%s"`, EscapeLabel(pos.Name), EscapeLabel(pos.MMSI), EscapeLabel(pos.Country))
+
 		fmt.Fprintf(&b, "icebreaker_latitude_degrees{%s} %.6f\n", labels, pos.Latitude)
 		fmt.Fprintf(&b, "icebreaker_longitude_degrees{%s} %.6f\n", labels, pos.Longitude)
 		if pos.Timestamp > 0 {
 			fmt.Fprintf(&b, "icebreaker_last_report_timestamp_seconds{%s} %d\n", labels, pos.Timestamp)
 			fmt.Fprintf(&b, "icebreaker_report_age_seconds{%s} %.0f\n", labels, math.Max(0, now-float64(pos.Timestamp)))
 		}
+
+		// Export AIS movement metrics
+		fmt.Fprintf(&b, "icebreaker_speed_over_ground_knots{%s} %.2f\n", labels, pos.SpeedOverGround)
+		fmt.Fprintf(&b, "icebreaker_course_over_ground_degrees{%s} %.1f\n", labels, pos.CourseOverGround)
+		fmt.Fprintf(&b, "icebreaker_heading_degrees{%s} %.1f\n", labels, pos.Heading)
+		fmt.Fprintf(&b, "icebreaker_navigation_status{%s} %d\n", labels, pos.NavigationStatus)
+		fmt.Fprintf(&b, "icebreaker_rate_of_turn_degrees_per_minute{%s} %.1f\n", labels, pos.RateOfTurn)
 	}
 
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")

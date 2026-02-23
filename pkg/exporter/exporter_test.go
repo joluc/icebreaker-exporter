@@ -70,12 +70,17 @@ func TestMetricsHandler(t *testing.T) {
 		RefreshDuration: 100 * time.Millisecond,
 		Positions: []models.IcebreakerPosition{
 			{
-				Name:      "OTSO",
-				MMSI:      "123456",
-				Country:   "FI",
-				Latitude:  60.1,
-				Longitude: 24.9,
-				Timestamp: time.Now().Unix(),
+				Name:             "OTSO",
+				MMSI:             "123456",
+				Country:          "FI",
+				Latitude:         60.1,
+				Longitude:        24.9,
+				Timestamp:        time.Now().Unix(),
+				SpeedOverGround:  5.2,
+				CourseOverGround: 45.0,
+				Heading:          47,
+				NavigationStatus: 0,
+				RateOfTurn:       2.5,
 			},
 		},
 	}
@@ -95,5 +100,22 @@ func TestMetricsHandler(t *testing.T) {
 	}
 	if !strings.Contains(body, `icebreaker_up 1`) {
 		t.Errorf("missing or incorrect metric output for up state:\n%s", body)
+	}
+
+	// Verify new movement metrics
+	if !strings.Contains(body, `icebreaker_speed_over_ground_knots{vessel_name="OTSO",mmsi="123456",country="FI"} 5.20`) {
+		t.Errorf("missing or incorrect SOG metric:\n%s", body)
+	}
+	if !strings.Contains(body, `icebreaker_course_over_ground_degrees{vessel_name="OTSO",mmsi="123456",country="FI"} 45.0`) {
+		t.Errorf("missing or incorrect COG metric:\n%s", body)
+	}
+	if !strings.Contains(body, `icebreaker_heading_degrees{vessel_name="OTSO",mmsi="123456",country="FI"} 47.0`) {
+		t.Errorf("missing or incorrect heading metric:\n%s", body)
+	}
+	if !strings.Contains(body, `icebreaker_navigation_status{vessel_name="OTSO",mmsi="123456",country="FI"} 0`) {
+		t.Errorf("missing or incorrect navigation status metric:\n%s", body)
+	}
+	if !strings.Contains(body, `icebreaker_rate_of_turn_degrees_per_minute{vessel_name="OTSO",mmsi="123456",country="FI"} 2.5`) {
+		t.Errorf("missing or incorrect ROT metric:\n%s", body)
 	}
 }

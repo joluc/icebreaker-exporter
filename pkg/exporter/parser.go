@@ -164,12 +164,50 @@ func parseGeoJSONLocation(item map[string]any) (models.LocationRecord, bool) {
 		ts = getTimestamp(item, "timestamp", "time", "locUpdateTimestamp")
 	}
 
+	// Extract AIS movement fields from properties
+	sog, _ := getNumber(properties, "sog", "speedOverGround")
+	if sog == 0 {
+		sog, _ = getNumber(item, "sog", "speedOverGround")
+	}
+	cog, _ := getNumber(properties, "cog", "courseOverGround")
+	if cog == 0 {
+		cog, _ = getNumber(item, "cog", "courseOverGround")
+	}
+	heading, _ := getNumber(properties, "heading", "headingDegrees")
+	if heading == 0 {
+		heading, _ = getNumber(item, "heading", "headingDegrees")
+	}
+	rot, _ := getNumber(properties, "rot", "rateOfTurn")
+	if rot == 0 {
+		rot, _ = getNumber(item, "rot", "rateOfTurn")
+	}
+
+	// Extract navigation status as integer
+	navStat := 0
+	if raw, ok := properties["navStat"]; ok && raw != nil {
+		if value, ok := toFloat64(raw); ok {
+			navStat = int(value)
+		}
+	}
+	if navStat == 0 {
+		if raw, ok := item["navStat"]; ok && raw != nil {
+			if value, ok := toFloat64(raw); ok {
+				navStat = int(value)
+			}
+		}
+	}
+
 	return models.LocationRecord{
-		Name:      strings.TrimSpace(name),
-		MMSI:      mmsi,
-		Latitude:  lat,
-		Longitude: lon,
-		Timestamp: ts,
+		Name:             strings.TrimSpace(name),
+		MMSI:             mmsi,
+		Latitude:         lat,
+		Longitude:        lon,
+		Timestamp:        ts,
+		SpeedOverGround:  sog,
+		CourseOverGround: cog,
+		Heading:          heading,
+		NavigationStatus: navStat,
+		RateOfTurn:       rot,
 	}, true
 }
 
@@ -187,12 +225,31 @@ func parseFlatLocation(item map[string]any) (models.LocationRecord, bool) {
 
 	ts := getTimestamp(item, "timestamp", "time", "locUpdateTimestamp")
 
+	// Extract AIS movement fields
+	sog, _ := getNumber(item, "sog", "speedOverGround")
+	cog, _ := getNumber(item, "cog", "courseOverGround")
+	heading, _ := getNumber(item, "heading", "headingDegrees")
+	rot, _ := getNumber(item, "rot", "rateOfTurn")
+
+	// Extract navigation status as integer
+	navStat := 0
+	if raw, ok := item["navStat"]; ok && raw != nil {
+		if value, ok := toFloat64(raw); ok {
+			navStat = int(value)
+		}
+	}
+
 	return models.LocationRecord{
-		Name:      strings.TrimSpace(getString(item, "name", "vesselName")),
-		MMSI:      mmsi,
-		Latitude:  lat,
-		Longitude: lon,
-		Timestamp: ts,
+		Name:             strings.TrimSpace(getString(item, "name", "vesselName")),
+		MMSI:             mmsi,
+		Latitude:         lat,
+		Longitude:        lon,
+		Timestamp:        ts,
+		SpeedOverGround:  sog,
+		CourseOverGround: cog,
+		Heading:          heading,
+		NavigationStatus: navStat,
+		RateOfTurn:       rot,
 	}, true
 }
 
@@ -229,12 +286,17 @@ func SelectIcebreakerPositions(vessels []models.VesselMetadata, locations []mode
 		}
 
 		candidate := models.IcebreakerPosition{
-			Name:      vessel.Name,
-			MMSI:      loc.MMSI,
-			Country:   vessel.Country,
-			Latitude:  loc.Latitude,
-			Longitude: loc.Longitude,
-			Timestamp: loc.Timestamp,
+			Name:             vessel.Name,
+			MMSI:             loc.MMSI,
+			Country:          vessel.Country,
+			Latitude:         loc.Latitude,
+			Longitude:        loc.Longitude,
+			Timestamp:        loc.Timestamp,
+			SpeedOverGround:  loc.SpeedOverGround,
+			CourseOverGround: loc.CourseOverGround,
+			Heading:          loc.Heading,
+			NavigationStatus: loc.NavigationStatus,
+			RateOfTurn:       loc.RateOfTurn,
 		}
 		current, exists := bestByMMSI[loc.MMSI]
 		if !exists || candidate.Timestamp > current.Timestamp {

@@ -15,6 +15,12 @@ type LocationRecord struct {
 	Latitude  float64
 	Longitude float64
 	Timestamp int64
+	// AIS movement fields
+	SpeedOverGround  float64 // knots
+	CourseOverGround float64 // degrees 0-360
+	Heading          float64 // degrees 0-360
+	NavigationStatus int     // 0-15
+	RateOfTurn       float64 // degrees per minute
 }
 
 type IcebreakerPosition struct {
@@ -24,6 +30,12 @@ type IcebreakerPosition struct {
 	Latitude  float64
 	Longitude float64
 	Timestamp int64 // Unix timestamp of the location record
+	// AIS movement fields
+	SpeedOverGround  float64 // knots
+	CourseOverGround float64 // degrees 0-360
+	Heading          float64 // degrees 0-360
+	NavigationStatus int     // 0-15
+	RateOfTurn       float64 // degrees per minute
 }
 
 type Snapshot struct {

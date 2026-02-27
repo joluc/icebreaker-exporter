@@ -1,0 +1,41 @@
+name: Release Chart to OCI
+
+on:
+  push:
+    tags:
+      - 'icebreaker-exporter-*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Log in to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Extract chart version from tag
+        id: chart_version
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          CHART_VERSION="${TAG_NAME#icebreaker-exporter-}"
+          echo "version=$CHART_VERSION" >> $GITHUB_OUTPUT
+          echo "Chart version: $CHART_VERSION"
+
+      - name: Package and push Helm chart
+        run: |
+          cd charts/icebreaker-exporter
+          helm package .
+          helm push icebreaker-exporter-${{ steps.chart_version.outputs.version }}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
+
+      - name: Logout from registry
+        if: always()
+        run: helm registry logout ghcr.io

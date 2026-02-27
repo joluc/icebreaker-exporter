@@ -1,16 +1,20 @@
-name: Release Chart to OCI
+name: Helm OCI Release
 
 on:
   push:
-    tags:
-      - 'chart-*'
+    branches:
+      - main
+    paths:
+      - 'charts/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  release:
+  release-oci:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,23 +22,12 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
 
-      - name: Log in to GitHub Container Registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Extract chart version from tag
-        id: chart_version
+      - name: Package and Push Chart
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/chart-}"
-          echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "Chart version: $TAG_NAME"
+          CHART_VERSION=$(grep '^version:' charts/icebreaker-exporter/Chart.yaml | awk '{print $2}')
+          helm package charts/icebreaker-exporter
+          helm push icebreaker-exporter-${CHART_VERSION}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
 
-      - name: Package and push Helm chart
-        run: |
-          cd charts/icebreaker-exporter
-          helm package .
-          helm push icebreaker-exporter-${{ steps.chart_version.outputs.version }}.tgz oci://ghcr.io/${{ github.repository_owner }}/charts
-
-      - name: Logout from registry
-        if: always()
-        run: helm registry logout ghcr.io

@@ -3,7 +3,7 @@ name: Release Chart to OCI
 on:
   push:
     tags:
-      - 'icebreaker-exporter-*'
+      - 'chart-*'
 
 jobs:
   release:
@@ -25,10 +25,9 @@ jobs:
       - name: Extract chart version from tag
         id: chart_version
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          CHART_VERSION="${TAG_NAME#icebreaker-exporter-}"
-          echo "version=$CHART_VERSION" >> $GITHUB_OUTPUT
-          echo "Chart version: $CHART_VERSION"
+          TAG_NAME="${GITHUB_REF#refs/tags/chart-}"
+          echo "version=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "Chart version: $TAG_NAME"
 
       - name: Package and push Helm chart
         run: |
